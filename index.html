@@ -1,0 +1,4036 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>bRMS, Masked, Q</title>
+
+
+    <meta charset="utf-8">
+
+    <script src="js/bowser.js"></script>
+
+    <script src="libs/jquery-min.js" type="text/javascript"></script>
+    <script src="libs/underscore-min.js" type="text/javascript"></script>
+    <script src="rms.js" type="text/javascript"></script>
+    <script src="jspsych.js" type="text/javascript"></script>
+    <script src="jspsych-brms.js" type="text/javascript"></script>
+    <script src="plugins/jspsych-image-cpt.js" type="text/javascript"></script>
+    <script src="plugins/jspsych-survey-likert.js" type="text/javascript"></script>
+    <script src="plugins/jspsych-survey-multi-choice.js" type="text/javascript"></script>
+    <script src="plugins/jspsych-survey-multi-select.js" type="text/javascript"></script>
+    <script src="plugins/jspsych-survey-text.js" type="text/javascript"></script>
+    <script src="plugins/jspsych-instructions.js" type="text/javascript"></script>
+    <script src="plugins/jspsych-html-keyboard-response.js" type="text/javascript"></script>
+    <script src="plugins/jspsych-html-slider-response.js" type="text/javascript"></script>
+    <script src="plugins/jspsych-image-keyboard-response.js" type="text/javascript"></script>
+    <script src="plugins/jspsych-fullscreen.js" type="text/javascript"></script>
+    <script src="plugins/jspsych-html-button-response.js" type="text/javascript"></script>
+    <script src="plugins/jspsych-call-function.js" type="text/javascript"></script>
+    <script src="jspsych-stop-signal-go-no-go.js" type="text/javascript"></script>
+    <script src="jspsych-image-cpt.js" type="text/javascript"></script>
+    <script src="js/jspsych-6.0.5/plugins/jspsych-call-function.js"></script>
+    <script src="js/bowser.js"></script>
+    <script src="js/sprintf.js"></script>
+    <script src="js/custom-stop-signal-plugin.js"></script>
+    <script src="js/jspsych-detect-held-down-keys.js"></script>
+    <script src="configuration/experiment_variables.js"></script>
+    <script src="configuration/text_variables.js"></script>
+
+    <link rel="stylesheet" href="css/jspsych.css" type="text/css">
+    </link>
+
+
+    <script>
+        /* create timeline SHE and HE */
+        var timeline_stop_signal = [];
+        var timeline_She = [];
+        var timeline_He = [];
+        var timeline_He_New = [];
+
+        /* define welcome message trial */
+        var welcome = {
+            type: "html-keyboard-response",
+            stimulus: ` <p style="text-align:center; float: center;"> 
+    <br />
+    ברוכים הבאים לניסוי <br />
+    <br /> ניסוי זה יהיה מורכב ממספר שלבים
+    <br />
+    <br /> מוזמנים ללחוץ על כל מקש כדי להתחיל
+    </p>
+    `,
+        };
+
+        /* Instructions for consent */
+
+        var instructions_Consent = {
+            type: "html-keyboard-response",
+            stimulus: `
+    <p style="text-align:center;" >
+        
+    הסכמה מדעת להשתתפות במחקר <br />
+    <br />
+    בניסוי זה תתבקש.י למלא מספר שאלונים ולבצע מספר מטלות קוגניטיביות מול מחשב<br /> 
+    <br />
+    הניסוי מתבצע במעבדה לנוירופסיכולוגיה קלינית של פרופ' אייל קלנטרוף <br />
+    מהמחלקה לפסיכולוגיה באוניברסיטה העברית בירושלים <br /> 
+    <br />
+    באשר לזהותך ותוצאותייך האישיות מובטחת סודיות מוחלטת <br />
+    <br />
+    במידה והניסוי גורם לך לאי נוחות, הנך חופשי.ה להפסיקו בכל שלב <br />
+    ועדיין תקבל.י את מלוא התמורה שהובטחה לך <br />
+    <br />
+    במהלך הניסוי תתבקש.י למלא שאלונים ולבצע מטלה ממוחשבת <br />
+    ,בכל בעיה הקשורה במחקר תוכל.י לפנות לחוקרת להתייעצות נוספת <br />
+    shir.berebbi@mail.huji.ac.il <br />
+    בתום הניסוי, במידה ותרצי לקבל פרטים נוספים על מטרת המחקר תוכל.י לפנות לחוקרת <br />
+    בכל עניין ניתן לפנות אל פרופ' אייל קלנטרוף בטלפון 02-5883025 או במייל eyal.kalanthroff@mail.huji.ac.il <br />
+        </p>
+        `
+        };
+
+        /* init connection with pavlovia.org */
+        var pavlovia_init = {
+            type: "pavlovia",
+            command: "init"
+        };
+
+        /* finish connection with pavlovia.org */
+        var pavlovia_finish = {
+            type: "pavlovia",
+            command: "finish"
+        };
+
+        var Consent = {
+            type: "html-keyboard-response",
+            stimulus: ` 
+        <p style="text-align:center;" >
+        אני מבינ.ה את ההנחיות והתנאים שקראתי ואני מסכימ.ה להשתתף במחקר  <br />
+        <br />
+        אם כן, לחצו על Y  <br />
+        אם לא, לחצו על N  <br />
+        <br />
+        </p>
+    `,
+            choices: ['y', 'n'],
+            required: true
+        };
+
+        var pronouns = {
+            type: "html-keyboard-response",
+            stimulus: ` 
+        <p style="text-align:center;" >
+        אנא סמנו את לשון הפנייה המועדפת עליכם  <br />
+        <br />
+        היא - לחצו על S  <br />
+        הוא - לחצו על H <br />
+        </p>
+    `,
+            choices: ['s', 'h'],
+            direction: "rtl",
+            on_finish: function(data) {
+                if (jsPsych.pluginAPI.compareKeys(data.response, "s")) {
+                    data.female = true;
+                } else {
+                    data.female = false;
+                }
+            }
+        };
+
+        var end_experiment_trial = {
+            type: "html-keyboard-response",
+            stimulus: 'נגמר הניסוי. תודה על השתתפותך',
+            on_finish: function(data) {
+                jsPsych.endExperiment();
+            }
+        };
+
+        var if_Consent = {
+            timeline: [end_experiment_trial, pavlovia_finish],
+            conditional_function: function() {
+                var data = jsPsych.data.get().last(1).values()[0];
+                if (data.key_press == 78) {
+                    return true
+                } else if (data.key_press == 89) {
+                    return false;
+                }
+            }
+        };
+
+        ////////////// She Demographic //////////////
+
+        var enter_fullscreen = {
+            type: "fullscreen",
+            fullscreen_mode: true
+        }
+
+        var trial_in_fullscreen = {
+            type: "html-button-response",
+            stimulus: 'הניסוי יהיה מעכשיו במסך מלא',
+            choices: ['Continue']
+        }
+
+        timeline_She = [enter_fullscreen, trial_in_fullscreen];
+        timeline_He = [enter_fullscreen, trial_in_fullscreen];
+
+        var sub_num = {
+            type: "survey-text",
+            direction: "rtl",
+            questions: [{
+                prompt: 'אנא הכניסי מספר נבדקת',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }]
+        };
+
+        var instructions_demographic = {
+            type: "html-keyboard-response",
+            stimulus: `
+    <p style="text-align:center;" >
+        לפני שנתחיל, יופיעו מספר שאלות  <br />
+        <br />
+        כדי להתחיל, לחצי על מקש הרווח<br />
+        </p>
+        `
+        };
+
+        var demographic_1 = {
+            type: "survey-multi-choice",
+            questions: [{
+                prompt: "כיצד את מגדירה את עצמך?",
+                options: ['אישה', 'גבר', 'לא בינארי', 'אחר', 'מעדיפה לא לענות'],
+                required: true
+            }, {
+                prompt: `<p> מהו מצבך הזוגי? </p> `,
+                options: ['רווקה', 'בזוגיות', 'נשואה', 'גרושה', 'אלמנה', 'אחר', 'מעדיפה לא לענות'],
+                required: true
+            }],
+        };
+
+        var demographic_2 = {
+            type: "survey-text",
+            direction: "rtl",
+            questions: [{
+                prompt: '4 ספרות אחרונות של תעודת הזהות',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }, {
+                prompt: 'מהו גילך?',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }, {
+                prompt: 'מהו משקלך?',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }, {
+                prompt: 'מהו הגובה שלך (בסנטימטרים)?',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }]
+        };
+
+        var demographic_3 = {
+            type: "survey-text",
+            direction: "rtl",
+            questions: [{
+                prompt: 'מהי השכלתך?',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }, {
+                prompt: 'האם את מאובחנת עם הפרעת קשב וריכוז?',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }, {
+                prompt: 'האם יש לך ילדים? אם כן, כמה?',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }]
+        };
+
+        var demographic_4 = {
+            type: "survey-text",
+            direction: "rtl",
+            questions: [{
+                prompt: 'מקום המגורים הנוכחי שלך',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }, {
+                prompt: 'מספר השנים שאת גרה במקום זה',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }],
+        };
+
+        var demographic_5 = {
+            type: "survey-text",
+            direction: "rtl",
+            questions: [{
+                prompt: 'מקום המגורים העיקרי בילדות',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }, {
+                prompt: 'מספר השנים שגרת בו',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }],
+        };
+
+        var demographic_6 = {
+            type: "survey-multi-choice",
+            questions: [{
+                prompt: `<p>
+        אני מסכימה שייצרו איתי קשר בנוגע להשתתפות במחקרים עתידיים במעבדה לנוירופסיכולוגיה קלינית. <br />
+        ניתן לבטל החלטה זו בכל עת וכמובן שאין כל התחייבות להשתתף <br />
+        </p>
+        `,
+                options: ['מסכימה', 'לא מסכימה'],
+                required: true
+            }],
+        };
+
+        timeline_She.push(sub_num, instructions_demographic, demographic_1, demographic_2, demographic_3, demographic_4, demographic_5, demographic_6);
+
+        ////////////// He Demographic //////////////
+
+        var sub_num_male = {
+            type: "survey-text",
+            direction: "rtl",
+            questions: [{
+                prompt: 'אנא הכנס מספר נבדק',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }]
+        };
+
+        var instructions_demographic_male = {
+            type: "html-keyboard-response",
+            stimulus: `
+    <p style="text-align:center;" >
+        כעת יופיעו מספר שאלות על עצמך  <br />
+        <br />
+        כדי להתחיל, לחץ על מקש הרווח<br />
+        </p>
+        `,
+            post_trial_gap: 2000
+        };
+
+        var demographic_1_male = {
+            type: "survey-multi-choice",
+            questions: [{
+                prompt: "כיצד אתה מגדיר את עצמך?",
+                options: ['אישה', 'גבר', 'לא בינארי', 'אחר', 'מעדיף לא לענות'],
+                required: true
+            }, {
+                prompt: `<p> מהו מצבך הזוגי? </p> `,
+                options: ['רווק', 'בזוגיות', 'נשוי', 'גרוש', 'אלמן', 'אחר', 'מעדיף לא לענות'],
+                required: true
+            }],
+        };
+
+        var demographic_2_male = {
+            type: "survey-text",
+            direction: "rtl",
+            questions: [{
+                prompt: '4 ספרות אחרונות של תעודת הזהות',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }, {
+                prompt: 'מהו גילך?',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }, {
+                prompt: 'מהו משקלך?',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }, {
+                prompt: 'מהו הגובה שלך (בסנטימטרים)?',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }]
+        };
+
+        var demographic_3_male = {
+            type: "survey-text",
+            direction: "rtl",
+            questions: [{
+                prompt: 'מהי השכלתך?',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }, {
+                prompt: 'האם אתה מאובחן עם הפרעת קשב וריכוז?',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }, {
+                prompt: 'האם יש לך ילדים? אם כן, כמה?',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }]
+        };
+
+        var demographic_4_male = {
+            type: "survey-text",
+            direction: "rtl",
+            questions: [{
+                prompt: 'מקום המגורים הנוכחי שלך',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }, {
+                prompt: 'מספר השנים שאתה גר במקום זה',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }],
+        };
+
+        var demographic_5_male = {
+            type: "survey-text",
+            direction: "rtl",
+            questions: [{
+                prompt: 'מקום המגורים העיקרי בילדות',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }, {
+                prompt: 'מספר השנים שגרת בו',
+                rows: 2.0,
+                columns: 20.0,
+                value: "",
+                required: true
+            }],
+        };
+
+        var demographic_6_male = {
+            type: "survey-multi-choice",
+            questions: [{
+                prompt: `<p>
+        אני מסכים שייצרו איתי קשר בנוגע להשתתפות במחקרים עתידיים במעבדה לנוירופסיכולוגיה קלינית. <br />
+        ניתן לבטל החלטה זו בכל עת וכמובן שאין כל התחייבות להשתתף <br />
+        </p>
+        `,
+                options: ['מסכים', 'לא מסכים'],
+                required: true
+            }],
+        };
+
+        timeline_He.push(sub_num_male, instructions_demographic_male, demographic_1_male, demographic_2_male, demographic_3_male, demographic_4_male, demographic_5_male, demographic_6_male);
+
+        ////////////// STOP - SIGNAL TASK //////////////
+
+        var max_resp_time = 1000;
+        var max_go_display = 1000;
+        var min_iti = 500;
+        var max_iti = 1500;
+        var starting_ss_onset = 200;
+
+        var sst_timeline = [];
+
+        var current_ss_onset = 0;
+        var mean_rt = 0;
+        // var acc_proportion = 0;
+
+        // helper functions
+        function getCurrentIti() {
+            return Math.floor(Math.random() * (max_iti - min_iti)) + min_iti;
+        }
+
+        function getMeanValidRt(data) {
+            // get only the SS GNG trials (ignoring fixations, etc), then get only the trials where the RT is not null (i.e. a response was made), then get the RT from each trial object
+            var resp_trial_rts = data.filter({
+                trial_type: "stop-signal-go-no-go"
+            }).filterCustom(function(trial) {
+                return trial.rt !== null;
+            }).select('rt');
+            var n_valid_trials = resp_trial_rts.count();
+            var mean_rt = resp_trial_rts.sum() / n_valid_trials;
+            console.log('starting mean RT: ', mean_rt);
+            rt_obj = {
+                mean_rt: mean_rt,
+                n_valid: n_valid_trials
+            };
+            return rt_obj;
+        }
+
+        var SST_train_instructions = {
+            type: "html-keyboard-response",
+            stimulus: `
+    <p style="text-align:center;" >
+    <br />
+    <br />
+    <br />
+        בניסוי הזה תופיע במרכז המסך צורה  <br />
+        אם הצורה היא עיגול, עלייך ללחוץ על המקש L <br />
+        ואם הצורה היא ריבוע, עלייך ללחוץ על המקש A <br />
+        <br />
+        אם הצבע של הצורה משתנה לאדום, עלייך לעצור את התגובה שלך ולא ללחוץ על שום מקש <br />
+        <br />
+        עלייך לעשות זאת הכי מהר והכי מדויק שניתן<br />
+    <br />
+    כעת יהיו מספר צעדי אימון <br />
+    <br />
+    ניתן ללחוץ על כל מקש כדי להתחיל <br />
+        </p>
+    `
+        };
+
+        //sst_timeline.push(SST_train_instructions);
+
+        // define trials
+        var start_trials = {
+            timeline: [{
+                type: 'image-keyboard-response',
+                stimulus: 'images/sst/Fixation.png',
+                choices: ['leftarrow', 'rightarrow'],
+                trial_duration: 500,
+                response_ends_trial: false,
+                data: {
+                    correct: null,
+                    task_segment: 'start_trials'
+                },
+                on_finish: function(data) {
+                    if (data.key_press == data.correct) {
+                        data.accuracy = 1;
+                    } else {
+                        data.accuracy = 0;
+                    }
+                    if (data.key_press == 'a') { // 'a' = square, 'l' = circle
+                        data.key_press_dir = 'square';
+                    } else if (data.key_press == 'l') {
+                        data.key_press_dir = 'circle';
+                    } else {
+                        data.key_press_dir = 'none';
+                    }
+                }
+            }, {
+                type: 'stop-signal-go-no-go',
+                go_stimulus: jsPsych.timelineVariable('go_stim'),
+                no_go_stimulus: jsPsych.timelineVariable('no_go_stim'),
+                choices: ['a', 'l'],
+                trial_type_ss_gng: jsPsych.timelineVariable('trial_type_ss_gng'),
+                stop_signal_onset: 200,
+                trial_duration: 1500,
+                response_ends_trial: true,
+                post_trial_gap: getCurrentIti,
+                data: jsPsych.timelineVariable('data'),
+                on_finish: function(data) {
+                    if (data.key_press == data.correct) {
+                        data.accuracy = 1;
+                    } else {
+                        data.accuracy = 0;
+                    }
+                    if (data.key_press == 'a') { // 'a' = square, 'l' = circle
+                        data.key_press_dir = 'square';
+                    } else if (data.key_press == 'l') {
+                        data.key_press_dir = 'circle';
+                    } else {
+                        data.key_press_dir = 'none';
+                    }
+                }
+            }],
+            timeline_variables: [{
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: 'a',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: 'a',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: 'a',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'stop',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: null,
+                        task_segment: 'main_trials'
+                    }
+                },
+
+                {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: 'l',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: 'l',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: 'l',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'stop',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: null,
+                        task_segment: 'main_trials'
+                    }
+                }
+            ],
+            randomize_order: true
+        };
+        //sst_timeline.push(start_trials);
+
+        var check_mean_rt = {
+            type: 'call-function',
+            func: function() {},
+            on_finish: function(data) {
+                // get the mean RT and number of valid trials from the start_trials
+                rt_obj = getMeanValidRt(jsPsych.data.getLastTimelineData());
+                var mean_rt_start_trials = rt_obj.mean_rt;
+                var n_valid_start_trials = rt_obj.n_valid;
+                // set values of global variables
+                mean_rt = mean_rt_start_trials;
+                if (mean_rt >= starting_ss_onset) {
+                    current_ss_onset = mean_rt - starting_ss_onset;
+                } else {
+                    current_ss_onset = starting_ss_onset;
+                }
+                console.log('starting SS onset ', current_ss_onset);
+                // add everything to the data for this trial
+                data.mean_rt = mean_rt_start_trials;
+                data.n_valid = n_valid_start_trials;
+                data.SS_onset = current_ss_onset;
+                data.task_segment = 'get_start_trial_info';
+            }
+        };
+        //sst_timeline.push(check_mean_rt);
+
+        var SST_main_instructions = {
+            type: "html-keyboard-response",
+            stimulus: `
+    <p style="text-align:center;" >
+    <br />
+    <br />
+    <br />
+        עכשיו נתחיל את המטלה. אנחנו מזכירים -  <br />
+        אם הצורה היא עיגול, עלייך ללחוץ על המקש L <br />
+        ואם הצורה היא ריבוע, עלייך ללחוץ על המקש A <br />
+        <br />
+        אם הצבע של הצורה משתנה לאדום, עלייך לעצור את התגובה שלך ולא ללחוץ על שום מקש <br />
+        <br />
+        עלייך לעשות זאת הכי מהר והכי מדויק שניתן<br />
+    <br />
+    <br />
+    ניתן ללחוץ על כל מקש כדי להתחיל <br />
+        </p>
+    `
+        };
+
+        //sst_timeline.push(SST_main_instructions);
+
+        var main_trials = {
+            timeline: [{
+                type: 'image-keyboard-response',
+                stimulus: 'images/sst/Fixation.png',
+                choices: ['leftarrow', 'rightarrow'],
+                trial_duration: 500,
+                response_ends_trial: false,
+                data: {
+                    correct: null,
+                    task_segment: 'main_trials'
+                },
+                on_finish: function(data) {
+                    if (data.key_press == data.correct) {
+                        data.accuracy = 1;
+                    } else {
+                        data.accuracy = 0;
+                    }
+                    if (data.key_press == 'a') { // a = square, l = circle
+                        data.key_press_dir = 'square';
+                    } else if (data.key_press == 'l') {
+                        data.key_press_dir = 'circle';
+                    } else {
+                        data.key_press_dir = 'none';
+                    }
+                }
+            }, {
+                type: 'stop-signal-go-no-go',
+                go_stimulus: jsPsych.timelineVariable('go_stim'),
+                no_go_stimulus: jsPsych.timelineVariable('no_go_stim'),
+                choices: ['a', 'l'],
+                trial_type_ss_gng: jsPsych.timelineVariable('trial_type_ss_gng'),
+                //stop_signal_onset: function() {return getSsOnset(mean_rt, current_ss_onset);},
+                stop_signal_onset: function() {
+                    return current_ss_onset;
+                },
+                trial_duration: 1500,
+                response_ends_trial: true,
+                post_trial_gap: getCurrentIti,
+                data: jsPsych.timelineVariable('data'),
+                on_finish: function(data) {
+                    //data.SS_onset = current_ss_onset;
+                    if (data.key_press == data.correct) {
+                        data.accuracy = 1;
+                        if (data.trial_type_ss_gng == 'stop' && current_ss_onset <= 950) {
+                            // increase SS onset by 50 ms
+                            current_ss_onset += 50;
+                            console.log('stop trial correct, new SS onset ', current_ss_onset);
+                        }
+                    } else {
+                        data.accuracy = 0;
+                        if (data.trial_type_ss_gng == 'stop' && current_ss_onset >= 50) {
+                            // decrease SS onset by 50 ms
+                            current_ss_onset -= 50;
+                            console.log('stop trial incorrect, new SS onset ', current_ss_onset);
+                        }
+                    }
+                    // recode key press: a = square, l = circle
+                    if (data.key_press == 'a') {
+                        data.key_press_dir = 'square';
+                    } else if (data.key_press == 'l') {
+                        data.key_press_dir = 'circle';
+                    } else {
+                        data.key_press_dir = 'none';
+                    }
+                }
+            }],
+            timeline_variables: [{
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: 'a',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: 'a',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: 'a',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'stop',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: null,
+                        task_segment: 'main_trials'
+                    }
+                },
+
+                {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: 'l',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: 'l',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: 'l',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'stop',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: null,
+                        task_segment: 'main_trials'
+                    }
+                }
+            ],
+            randomize_order: true,
+            repetitions: 5
+        };
+        //sst_timeline.push(main_trials);
+
+        var SST_block_instructions = {
+            type: "html-keyboard-response",
+            stimulus: `
+    <p style="text-align:center;" >
+    <br />
+    <br />
+    <br />
+       נגמר הבלוק  <br />
+    <br />
+    ניתן לקחת נשימה ולהמשיך על ידי לחיצה על כל מקש  <br />
+    <br />
+        </p>
+    `
+        };
+
+        //sst_timeline.push(SST_block_instructions);
+        //sst_timeline.push(main_trials);
+        //sst_timeline.push(SST_block_instructions);
+        //sst_timeline.push(main_trials);
+        //sst_timeline.push(SST_block_instructions);
+        //sst_timeline.push(main_trials);
+        //sst_timeline.push(SST_block_instructions);
+        //sst_timeline.push(main_trials);
+        //sst_timeline.push(SST_block_instructions);
+        //sst_timeline.push(main_trials);
+
+        sst_timeline.forEach(function(element) {
+            timeline_She.push(element);
+            timeline_He.push(element);
+        });
+
+
+        ////////////// FOOD STOP - SIGNAL TASK //////////////
+
+        var food_sst_timeline = [];
+
+        var F_SST_train_instructions = {
+            type: "html-keyboard-response",
+            stimulus: `
+    <p style="text-align:center;" >
+    <br />
+    <br />
+    <br />
+        בניסוי הזה תופיע במרכז המסך צורה  <br />
+        אם הצורה היא עיגול, עלייך ללחוץ על המקש L <br />
+        ואם הצורה היא ריבוע, עלייך ללחוץ על המקש A <br />
+        <br />
+        אם תופיע תמונה של אוכל באמצע הצורה, עלייך לעצור את התגובה שלך ולא ללחוץ על שום מקש <br />
+        <br />
+        עלייך לעשות זאת הכי מהר והכי מדויק שניתן<br />
+    <br />
+    כעת יהיו מספר צעדי אימון <br />
+    <br />
+    ניתן ללחוץ על כל מקש כדי להתחיל <br />
+        </p>
+    `
+        };
+
+        //food_sst_timeline.push(F_SST_train_instructions);
+
+        // define trials
+        var food_start_trials = {
+            timeline: [{
+                type: 'image-keyboard-response',
+                stimulus: 'images/sst/Fixation.png',
+                choices: ['leftarrow', 'rightarrow'],
+                trial_duration: 500,
+                response_ends_trial: false,
+                data: {
+                    correct: null,
+                    task_segment: 'start_trials'
+                },
+                on_finish: function(data) {
+                    if (data.key_press == data.correct) {
+                        data.accuracy = 1;
+                    } else {
+                        data.accuracy = 0;
+                    }
+                    if (data.key_press == 'a') { // 'a' = square, 'l' = circle
+                        data.key_press_dir = 'square';
+                    } else if (data.key_press == 'l') {
+                        data.key_press_dir = 'circle';
+                    } else {
+                        data.key_press_dir = 'none';
+                    }
+                }
+            }, {
+                type: 'stop-signal-go-no-go',
+                go_stimulus: jsPsych.timelineVariable('go_stim'),
+                no_go_stimulus: jsPsych.timelineVariable('no_go_stim'),
+                choices: ['a', 'l'],
+                trial_type_ss_gng: jsPsych.timelineVariable('trial_type_ss_gng'),
+                stop_signal_onset: 200,
+                trial_duration: 1000,
+                response_ends_trial: true,
+                post_trial_gap: getCurrentIti,
+                data: jsPsych.timelineVariable('data'),
+                on_finish: function(data) {
+                    if (data.key_press == data.correct) {
+                        data.accuracy = 1;
+                    } else {
+                        data.accuracy = 0;
+                    }
+                    if (data.key_press == 'a') { // 'a' = square, 'l' = circle
+                        data.key_press_dir = 'square';
+                    } else if (data.key_press == 'l') {
+                        data.key_press_dir = 'circle';
+                    } else {
+                        data.key_press_dir = 'none';
+                    }
+                }
+            }],
+            timeline_variables: [{
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Food_Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: 'a',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Food_Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: 'a',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Food_Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: 'a',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'stop',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Food_Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: null,
+                        task_segment: 'main_trials'
+                    }
+                },
+
+                {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Food_Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: 'l',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Food_Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: 'l',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Food_Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: 'l',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'stop',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Food_Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: null,
+                        task_segment: 'main_trials'
+                    }
+                }
+            ],
+            randomize_order: true
+        };
+        //food_sst_timeline.push(food_start_trials);
+
+        //food_sst_timeline.push(check_mean_rt);
+
+        var F_SST_main_instructions = {
+            type: "html-keyboard-response",
+            stimulus: `
+    <p style="text-align:center;" >
+    <br />
+    <br />
+    <br />
+        עכשיו נתחיל את המטלה. אנחנו מזכירים -  <br />
+        אם הצורה היא עיגול, עלייך ללחוץ על המקש L <br />
+        ואם הצורה היא ריבוע, עלייך ללחוץ על המקש A <br />
+        <br />
+        אם תופיע תמונה של אוכל באמצע הצורה, עלייך לעצור את התגובה שלך ולא ללחוץ על שום מקש <br />
+        <br />
+        עלייך לעשות זאת הכי מהר והכי מדויק שניתן<br />
+    <br />
+    <br />
+    ניתן ללחוץ על כל מקש כדי להתחיל <br />
+        </p>
+    `
+        };
+
+        //food_sst_timeline.push(F_SST_main_instructions);
+
+        var food_main_trials = {
+            timeline: [{
+                type: 'image-keyboard-response',
+                stimulus: 'images/sst/Fixation.png',
+                choices: ['leftarrow', 'rightarrow'],
+                trial_duration: 500,
+                response_ends_trial: false,
+                data: {
+                    correct: null,
+                    task_segment: 'main_trials'
+                },
+                on_finish: function(data) {
+                    if (data.key_press == data.correct) {
+                        data.accuracy = 1;
+                    } else {
+                        data.accuracy = 0;
+                    }
+                    if (data.key_press == 'a') { // a = square, l = circle
+                        data.key_press_dir = 'square';
+                    } else if (data.key_press == 'l') {
+                        data.key_press_dir = 'circle';
+                    } else {
+                        data.key_press_dir = 'none';
+                    }
+                }
+            }, {
+                type: 'stop-signal-go-no-go',
+                go_stimulus: jsPsych.timelineVariable('go_stim'),
+                no_go_stimulus: jsPsych.timelineVariable('no_go_stim'),
+                choices: ['a', 'l'],
+                trial_type_ss_gng: jsPsych.timelineVariable('trial_type_ss_gng'),
+                //stop_signal_onset: function() {return getSsOnset(mean_rt, current_ss_onset);},
+                stop_signal_onset: function() {
+                    return current_ss_onset;
+                },
+                trial_duration: 1000,
+                response_ends_trial: true,
+                post_trial_gap: getCurrentIti,
+                data: jsPsych.timelineVariable('data'),
+                on_finish: function(data) {
+                    //data.SS_onset = current_ss_onset;
+                    if (data.key_press == data.correct) {
+                        data.accuracy = 1;
+                        if (data.trial_type_ss_gng == 'stop' && current_ss_onset <= 950) {
+                            // increase SS onset by 50 ms
+                            current_ss_onset += 50;
+                            console.log('stop trial correct, new SS onset ', current_ss_onset);
+                        }
+                    } else {
+                        data.accuracy = 0;
+                        if (data.trial_type_ss_gng == 'stop' && current_ss_onset >= 50) {
+                            // decrease SS onset by 50 ms
+                            current_ss_onset -= 50;
+                            console.log('stop trial incorrect, new SS onset ', current_ss_onset);
+                        }
+                    }
+                    // recode key press: a = square, l = circle
+                    if (data.key_press == 'a') {
+                        data.key_press_dir = 'square';
+                    } else if (data.key_press == 'l') {
+                        data.key_press_dir = 'circle';
+                    } else {
+                        data.key_press_dir = 'none';
+                    }
+                }
+            }],
+            timeline_variables: [{
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Food_Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: 'a',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Food_Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: 'a',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Food_Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: 'a',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'stop',
+                    go_stim: 'images/sst/Squre.png',
+                    no_go_stim: 'images/sst/Food_Stop_Squre.png',
+                    data: {
+                        direction: 'square',
+                        correct: null,
+                        task_segment: 'main_trials'
+                    }
+                },
+
+                {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Food_Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: 'l',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Food_Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: 'l',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'go',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Food_Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: 'l',
+                        task_segment: 'main_trials'
+                    }
+                }, {
+                    trial_type_ss_gng: 'stop',
+                    go_stim: 'images/sst/Circle.png',
+                    no_go_stim: 'images/sst/Food_Stop_Circle.png',
+                    data: {
+                        direction: 'circle',
+                        correct: null,
+                        task_segment: 'main_trials'
+                    }
+                }
+            ],
+            randomize_order: true,
+            repetitions: 5
+        };
+        //food_sst_timeline.push(food_main_trials);
+
+        //food_sst_timeline.push(SST_block_instructions);
+        //food_sst_timeline.push(food_main_trials);
+        //food_sst_timeline.push(SST_block_instructions);
+        //food_sst_timeline.push(food_main_trials);
+        //food_sst_timeline.push(SST_block_instructions);
+        //food_sst_timeline.push(food_main_trials);
+        //food_sst_timeline.push(SST_block_instructions);
+        //food_sst_timeline.push(food_main_trials);
+        //food_sst_timeline.push(SST_block_instructions);
+        //food_sst_timeline.push(food_main_trials);
+
+
+        food_sst_timeline.forEach(function(element) {
+            timeline_She.push(element);
+            timeline_He.push(element);
+        });
+
+
+        ////////////// bRMS - She //////////////
+
+        // Shuffle list function
+        function shuffle(array) {
+            let currentIndex = array.length,
+                randomIndex;
+
+            // While there remain elements to shuffle...
+            while (currentIndex != 0) {
+                // Pick a remaining element...
+                let randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                // And swap it with the current element.
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]
+                ];
+            }
+
+            return array;
+        }
+
+        // Downlowd file function
+        function download(filename, text) {
+            let element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+
+            element.style.display = 'none';
+            document.body.appendChild(element);
+
+            element.click();
+
+            document.body.removeChild(element);
+        }
+
+        // Create RMS trials instructions
+        const rms_instructions = {
+            type: "html-keyboard-response",
+            pages: [
+                "בניסוי זה יוצגו ריבועים צבעוניים מרצדים, ומדי פעם יופיעו עליהם גירויים שונים. מטרתך היא לזהות היכן מופיע גירוי – האם מימין או משמאל לנקודה בה את מתמקדת במסך.",
+                "קצב הופעת הגירויים בניסוי מאוד משתנה. לפעמים הגירויים יופיעו במהירות בזה אחר זה, ולפעמים ייקח להם זמן. ",
+                "חשוב לנו מאוד לדעת מתי בדיוק התחילו להופיע הגירויים. לכן נבקש ממך למקד את המבט בצלב שבמרכז המסך, וללחוץ על מקש התשובה ברגע שאת יודעת את התשובה.                           אנא היי הכי מדוייקת והכי מהירה שאת יכולה להיות. ",
+                "אם ראית גירוי משמאל מרכז המסך, יש ללחוץ על המקש Q אם ראית גירוי מימין למרכז המסך, יש ללחוץ על המקש P.",
+                "כעת נעשה אימון קצר למטלה כדי לוודא שההוראות מובנות, במידה וישנן שאלות את מוזמנת לפנות לנסיין"
+            ],
+            "show_clickable_nav": true,
+            "type": "instructions",
+            "direction": "rtl",
+            "name": "rms_instructions"
+        };
+
+        const rms_main_instructions = {
+            type: "html-keyboard-response",
+            "pages": [
+                "כעת נתחיל את המטלה. נבקשך לשבת בנוחות ככל האפשר ולמקם את האצבעות על שני המקשים P-ו Q. כשאת מוכנה, הקישי המשך."
+            ],
+            "show_clickable_nav": true,
+            "type": "instructions",
+            "direction": "rtl",
+            "name": "intro_2"
+        };
+
+        // Create RMS trials
+
+        let rms_count = 0
+        let rms_duration = 0
+
+        function get_med_rt() {
+            last_5_values = jsPsych.data.get().last(10).values();
+            med_rt = 0;
+            last_5_values.forEach(element => {
+                try {
+                    med_rt = element.med_rt;
+                } catch (error) {
+                    console.log(error);
+                }
+            });
+            console.log("med_rt", med_rt);
+            return med_rt
+        }
+
+        function getRmsTrials(baseFileName, images, fileExtention, choices) {
+            rms_trials = []
+            shuffle(images).forEach(element => {
+                rms_trials.push({
+                    type: "bRMS",
+                    stimulus: baseFileName + element + fileExtention,
+                    choices: choices,
+                    response_ends_trial: true,
+                    post_trial_gap: 400,
+                    stimulus_opacity: 0.3,
+                    right_up: ['P'],
+                    left_down: ['Q'],
+                    on_finish: function(data) {
+                        if (data.correct == true) {
+                            rms_count++;
+                            rms_duration += data.rt;
+                            data.med_rt = rms_duration / rms_count;
+                        }
+                    }
+                });
+            });
+
+            return rms_trials;
+        }
+
+        function getRmsPracticeTrials(baseFileName, images, fileExtention, choices, duration = 10) {
+            rms_trials = []
+            shuffle(images).forEach(element => {
+                rms_trials.push({
+                    type: "bRMS",
+                    stimulus: baseFileName + element + fileExtention,
+                    choices: choices,
+                    response_ends_trial: true,
+                    post_trial_gap: 400,
+                    stimulus_opacity: 0.3,
+                    timing_response: duration,
+                    right_up: ['P'],
+                    left_down: ['Q'],
+                    validate: true,
+                    validationCorrect: "images/validations/correct.png",
+                    validationIncorrect: "images/validations/incorrect.png",
+                });
+            });
+
+            return rms_trials;
+        }
+
+        // Add RMS to timeline
+        const baseFileName = "images/rms/";
+        const imagesPractice = ["1008", "1026", "1032", "1037", "1056", "1092", "1096", "1132", "1135", "1142"];
+        const imagesMain = ["1002", "1007", "1012", "1013", "1019", "1020", "1024", "1028", "1030", "1031",
+            "1034", "1035", "1036", "1038", "1039", "1053", "1057", "1095", "1108", "1130",
+            "1134", "1139", "1141", "1143", "1144", "1146", "1147", "1148", "1151", "1152",
+            "1154", "1156", "1198", "1208", "1210", "1218", "1222", "1231", "1232", "1234",
+            "1235", "1240", "1241", "1247", "1248", "1250", "1251", "1256", "1258", "1261",
+            "1262", "1265", "1267", "1273", "1274", "1277", "1286", "1293", "1313", "1314"
+        ];
+        const choices = ["q", "p"]
+        let rmsTimeline = []
+
+        rmsTimeline.push(rms_instructions);
+
+        practiceRmsTrials = getRmsPracticeTrials(baseFileName, imagesPractice, ".jpg", choices);
+        shuffle(practiceRmsTrials).forEach(function(trial) {
+            rmsTimeline.push(trial);
+        });
+
+        rmsTimeline.push(rms_main_instructions);
+
+        shuffle(getRmsTrials(baseFileName, imagesMain, ".jpg", choices)).forEach(function(trial) {
+            rmsTimeline.push(trial);
+        });
+
+        rmsTimeline.forEach(function(trial) {
+            timeline_She.push(trial);
+        });
+
+
+        ////////////// CPT //////////////
+        function createCpt(cptPercent, otherPercent, trialCount, ifValidate) {
+            const cptGaps = [1000, 1500, 2000, 2500];
+            const cptDuration = 100;
+            const size = 1.8;
+            const stimulusShape = "square";
+            const stimulusColor = "red";
+            const otherShapes = ["circle", "triangle", "star"];
+            const otherColors = ["yellow", "green", "blue"];
+
+            const cpt_main_instructions = {
+                pages: [
+                    "כעת נתחיל את המטלה. נבקשך לשבת בנוחות ככל האפשר ולמקם את ידך על מקש הרווח. כשאת מוכנה, הקישי המשך."
+                ],
+                show_clickable_nav: true,
+                type: "instructions",
+                direction: "rtl",
+                name: "instructions_2"
+            }
+
+            let gaps = [];
+            for (let i = 0; i < (trialCount / cptGaps.length); i++) {
+                cptGaps.forEach(element => {
+                    gaps.push(element);
+                });
+            }
+
+            gaps = shuffle(gaps);
+
+            cpt_trials = [];
+            for (let i = 0; i < Math.floor(trialCount * cptPercent); i++) {
+                cpt_trials.push({
+                    type: "image-cpt",
+                    stimulus: "images/cpt/" + stimulusShape + "_" + stimulusColor + ".png",
+                    validationCorrect: "images/validations/correct.png",
+                    validationIncorrect: "images/validations/incorrect.png",
+                    isStimulus: true,
+                    response_ends_trial: false,
+                    trial_duration: gaps.pop() + cptDuration,
+                    stimulus_duration: cptDuration,
+                    choices: [32],
+                    validate: ifValidate
+                });
+            }
+
+            others = [];
+            for (let i = 0; i < Math.ceil((Math.floor(trialCount * otherPercent) / 3)); i++) {
+                otherShapes.forEach(currentShape => {
+                    others.push({
+                        type: "image-cpt",
+                        stimulus: "images/cpt/" + currentShape + "_" + stimulusColor + ".png",
+                        validationCorrect: "images/validations/correct.png",
+                        validationIncorrect: "images/validations/incorrect.png",
+                        isStimulus: false,
+                        response_ends_trial: false,
+                        trial_duration: gaps.pop() + cptDuration,
+                        stimulus_duration: cptDuration,
+                        choices: [32],
+                        validate: ifValidate
+                    });
+                });
+            }
+
+            others.slice(0, Math.floor(trialCount * otherPercent)).forEach(element => {
+                cpt_trials.push(element);
+            });
+
+            others = [];
+            for (let i = 0; i < Math.ceil((Math.floor(trialCount * otherPercent) / 3)); i++) {
+                otherColors.forEach(currentColor => {
+                    others.push({
+                        type: "image-cpt",
+                        stimulus: "images/cpt/" + stimulusShape + "_" + currentColor + ".png",
+                        validationCorrect: "images/validations/correct.png",
+                        validationIncorrect: "images/validations/incorrect.png",
+                        isStimulus: false,
+                        response_ends_trial: false,
+                        trial_duration: gaps.pop() + cptDuration,
+                        stimulus_duration: cptDuration,
+                        choices: [32],
+                        validate: ifValidate
+                    });
+                });
+            }
+
+            others.slice(0, Math.floor(trialCount * otherPercent)).forEach(element => {
+                cpt_trials.push(element);
+            });
+
+            maxValue = trialCount - cpt_trials.length;
+            let count = 0;
+            for (count = 0; count < maxValue; count += 9) {
+                for (let i = 0; i < otherShapes.length; i++) {
+                    for (let j = 0; j < otherColors.length; j++) {
+                        cpt_trials.push({
+                            type: "image-cpt",
+                            stimulus: "images/cpt/" + otherShapes[i] + "_" + otherColors[j] + ".png",
+                            validationCorrect: "images/validations/correct.png",
+                            validationIncorrect: "images/validations/incorrect.png",
+                            isStimulus: false,
+                            trial_duration: gaps.pop() + cptDuration,
+                            stimulus_duration: cptDuration,
+                            response_ends_trial: false,
+                            choices: [32],
+                            validate: ifValidate
+                        });
+                    }
+                }
+            }
+            return cpt_trials.slice(0, trialCount);
+        }
+
+
+        ////////////// CPT - He //////////////
+        // CPT instructions
+        const cpt_instructions_HE = {
+            pages: [
+                "בחלק הבא, יוצגו על המסך צורות שונות בצבעים שונים. עלייך ללחוץ על מקש הרווח אך ורק כשתראה ריבוע אדום",
+                "כעת נעשה אימון קצר למטלה כדי לוודא שההוראות מובנות"
+            ],
+            show_clickable_nav: true,
+            type: "instructions",
+            direction: "rtl",
+            name: "cpt_instructions_1_HE"
+        }
+
+        // CPT aftar practice instractions
+        const cpt_main_instructions_HE = {
+            pages: [
+                "כעת נתחיל את המטלה. נבקשך לשבת בנוחות ככל האפשר ולמקם את ידך על מקש הרווח. כשאתה מוכן, הקש המשך."
+            ],
+            show_clickable_nav: true,
+            type: "instructions",
+            direction: "rtl",
+            name: "instructions_2"
+        }
+
+        let cptTimeline_HE = [];
+
+        // Add cpt practice instructions
+        cptTimeline_HE.push(cpt_instructions_HE);
+        // Create CPT trials (practice) and add to timeline
+        shuffle(createCpt(0.3, 0.175, 15, true)).forEach(function(trial) {
+            cptTimeline_HE.push(trial);
+        });
+        // Add cpt main instructions
+        cptTimeline_HE.push(cpt_main_instructions_HE)
+            // Create CPT trials (main) and add to timeline
+        shuffle(createCpt(0.3, 0.175, 320, false)).forEach(function(trial) {
+            cptTimeline_HE.push(trial);
+        });
+
+        ////////////// CPT - She //////////////
+        cptTimeline_SHE = [];
+
+        // CPT instructions
+        const cpt_instructions_SHE = {
+            pages: [
+                "בחלק הבא, יוצגו על המסך צורות שונות בצבעים שונים. עלייך ללחוץ על מקש הרווח אך ורק כשתראי ריבוע אדום",
+                "כעת נעשה אימון קצר למטלה כדי לוודא שההוראות מובנות, במידה וישנן שאלות את מוזמנת לפנות לנסיין"
+            ],
+            show_clickable_nav: true,
+            type: "instructions",
+            direction: "rtl",
+            name: "cpt_instructions_1"
+        }
+
+        // CPT aftar practice instractions
+        const cpt_main_instructions_SHE = {
+            pages: [
+                "כעת נתחיל את המטלה. נבקשך לשבת בנוחות ככל האפשר ולמקם את ידך על מקש הרווח. כשאת מוכנה, הקישי המשך."
+            ],
+            show_clickable_nav: true,
+            type: "instructions",
+            direction: "rtl",
+            name: "instructions_2"
+        }
+
+
+        // Add cpt practice instructions
+        cptTimeline_SHE.push(cpt_instructions_SHE);
+        // Create CPT trials (practice) and add to timeline
+        shuffle(createCpt(0.3, 0.175, 15, true)).forEach(function(trial) {
+            cptTimeline_SHE.push(trial);
+        });
+        // Add cpt main instructions
+        cptTimeline_SHE.push(cpt_main_instructions_SHE)
+            // Create CPT trials (main) and add to timeline
+        shuffle(createCpt(0.3, 0.175, 320, false)).forEach(function(trial) {
+            cptTimeline_SHE.push(trial);
+        });
+
+
+        ////////////// bRMS - He //////////////
+
+        // Create RMS trials instructions - For Male
+        const rms_instructions_male = {
+            type: "html-keyboard-response",
+            pages: [
+                "בניסוי זה יוצגו ריבועים צבעוניים מרצדים, ומדי פעם יופיעו עליהם גירויים שונים. מטרתך היא לזהות היכן מופיע גירוי – האם מימין או משמאל לנקודה בה אתה מתמקד במסך.",
+                "קצב הופעת הגירויים בניסוי מאוד משתנה. לפעמים הגירויים יופיעו במהירות בזה אחר זה, ולפעמים ייקח להם זמן. ",
+                "חשוב לנו מאוד לדעת מתי בדיוק התחילו להופיע הגירויים. לכן נבקש ממך למקד את המבט בצלב שבמרכז המסך, וללחוץ על מקש התשובה ברגע שאתה יודע את התשובה. אנא היה הכי מדוייק והכי מהיר שאתה יכול להיות. ",
+                "אם ראית גירוי משמאל מרכז המסך, יש ללחוץ על המקש Q אם ראית גירוי מימין למרכז המסך, יש ללחוץ על המקש P.",
+                "כעת נעשה אימון קצר למטלה כדי לוודא שההוראות מובנות, במידה וישנן שאלות אתה מוזמן לפנות לנסיין"
+            ],
+            "show_clickable_nav": true,
+            "type": "instructions",
+            "direction": "rtl",
+            "name": "rms_instructions_male"
+        };
+
+        const rms_main_instructions_male = {
+            type: "html-keyboard-response",
+            "pages": [
+                "כעת נתחיל את המטלה. נבקשך לשבת בנוחות ככל האפשר ולמקם את האצבעות על שני המקשים P-ו Q. כשאתה מוכן, הקיש המשך."
+            ],
+            "show_clickable_nav": true,
+            "type": "instructions",
+            "direction": "rtl",
+            "name": "intro_2"
+        };
+
+        // Add RMS to timeline - For Male
+        let rmsTimelineM = []
+
+        rmsTimelineM.push(rms_instructions_male);
+
+        practiceRmsTrialsM = getRmsPracticeTrials(baseFileName, imagesPractice, ".jpg", choices);
+        shuffle(practiceRmsTrialsM).forEach(function(trial) {
+            rmsTimelineM.push(trial);
+        });
+
+        rmsTimelineM.push(rms_main_instructions_male);
+
+        shuffle(getRmsTrials(baseFileName, imagesMain, ".jpg", choices)).forEach(function(trial) {
+            rmsTimelineM.push(trial);
+        });
+
+        rmsTimelineM.forEach(function(trial) {
+            timeline_He.push(trial);
+        });
+
+        ////////////// Masked //////////////
+
+        /* Add instructions */
+        var masked_instructions = {
+            type: "html-keyboard-response",
+            stimulus: `
+    <p style="text-align:center;" >
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+        בניסוי הזה יופיעו על המסך חיצים שיופנו לכיוון ימין או לכיוון שמאל <br />
+        אם החץ מופנה לכיוון ימין, עלייך ללחוץ על המקש M <br />
+        ואם החץ מופנה לכיוון שמאל, עלייך ללחוץ על המקש Z <br />
+        עלייך לעשות זאת הכי מהר והכי מדויק שניתן<br />
+    <br />
+    <br />
+    <br />
+    ניתן ללחוץ על כל מקש כדי להתחיל <br />
+        </p>
+    `
+        };
+
+        /* Add to the timeline_She */
+        //timeline_She.push(masked_instructions);
+        //timeline_He.push(masked_instructions);
+
+        /* timeline variables */
+
+        /* an array that contains all the different trials 
+        and the right response for each trail */
+        var test_stimuli = [{
+            stimulus: "img/Left.png",
+            correct_response: 'z'
+        }, {
+            stimulus: "img/Right.png",
+            correct_response: 'm'
+        }];
+
+        /* Add fixation cross, for 1000 ms 
+        and there are no response.
+        The 'task' add imformation that this is a fixation trail*/
+        var fixation = {
+            type: "html-keyboard-response",
+            stimulus: '<div style="font-size:200px; margin-left:40%">+</div>',
+            choices: "NO_KEYS",
+            trial_duration: 1000,
+            data: {
+                task: 'fixation'
+            }
+        };
+
+        /* To show the circles, we use this to indicate that 
+        the value of the parameter substituted in from the 
+        timeline variables.
+        The task add additional data for each trail.
+        The on_finish check if the subject responded correctly */
+        var test = {
+            type: "image-keyboard-response",
+            stimulus: jsPsych.timelineVariable('stimulus'),
+            choices: ['z', 'm'],
+            data: {
+                task: 'response',
+                correct_response: jsPsych.timelineVariable('correct_response')
+            },
+            on_finish: function(data) {
+                data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+            }
+        }
+
+        /*  create a new timeline 
+        and set the timeline_variables property */
+
+        const imagesMainArrow = ["Right", "Left"];
+
+        function getMaskedRmsTrials(baseFileName, fileExtention, count) {
+            let masked_trials = [];
+            for (let i = 0; i < count; i++) {
+                let side = Math.floor(Math.random() * 2);
+                masked_trials.push({
+                    type: "bRMS",
+                    stimulus: baseFileName + imagesMainArrow[side] + fileExtention,
+                    choices: [],
+                    post_trial_gap: 10,
+                    stimulus_opacity: 0.3,
+                    timing_response: function() {
+                        last_5_values = jsPsych.data.get().last(10 + i).values();
+                        med_rt = 0;
+                        last_5_values.forEach(element => {
+                            if (element != undefined && element.med_rt != undefined) {
+                                med_rt = element.med_rt;
+                            }
+                        });
+                        console.log("med_rt", med_rt);
+                        return med_rt / 1000
+                    },
+                    validate: false
+                });
+                masked_trials.push({
+                    type: "image-keyboard-response",
+                    stimulus: baseFileName + imagesMainArrow[side] + fileExtention,
+                    choices: ['z', 'm'],
+                    data: {
+                        task: 'response',
+                        correct_response: side == 1 ? 'z' : 'm'
+                    },
+                    // on_finish: function(data) {
+                    //     console.log(1)
+                    //         // data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+                    // }
+                })
+            }
+            return masked_trials;
+        }
+
+        var test_procedure = {
+            timeline: [fixation,
+                getRmsTrials(baseFileName, [imagesMainArrow[0]], ".png", [], get_med_rt())[0],
+                test
+            ],
+            timeline_variables: test_stimuli,
+            randomize_order: true,
+            repetitions: 5
+        }
+
+        timeline_She.push(test_procedure);
+        timeline_He.push(test_procedure);
+
+        ////////////// Food bRMS - She //////////////
+
+        const rms_instructions_Food = {
+            type: "html-keyboard-response",
+            pages: [
+                "בניסוי זה יוצגו ריבועים צבעוניים מרצדים, ומדי פעם יופיעו עליהם גירויים שונים. מטרתך היא לזהות היכן מופיע גירוי – האם מימין או משמאל לנקודה בה את מתמקדת במסך.",
+                "קצב הופעת הגירויים בניסוי מאוד משתנה. לפעמים הגירויים יופיעו במהירות בזה אחר זה, ולפעמים ייקח להם זמן. ",
+                "חשוב לנו מאוד לדעת מתי בדיוק התחילו להופיע הגירויים. לכן נבקש ממך למקד את המבט בצלב שבמרכז המסך, וללחוץ על מקש התשובה ברגע שאת יודעת את התשובה. אנא היי הכי מדוייקת והכי מהירה שאת יכולה להיות. ",
+                "אם ראית גירוי משמאל מרכז המסך, יש ללחוץ על המקש Q אם ראית גירוי מימין למרכז המסך, יש ללחוץ על המקש P.",
+                "כעת נתחיל את המטלה. נבקשך לשבת בנוחות ככל האפשר ולמקם את האצבעות על שני המקשים P-ו Q. כשאת מוכנה, הקישי המשך.",
+            ],
+            "show_clickable_nav": true,
+            "type": "instructions",
+            "direction": "rtl",
+            "name": "rms_instructions_Food"
+        };
+
+        const baseFileNameFood = "images/rms/food/";
+        const imagesMainFood = ["0019", "0025", "0030", "0043", "0052", "0059", "0061", "0065", "0072", "0073",
+            "0086", "0093", "0101", "0103", "0116", "0127", "0131", "0137", "0142", "0156",
+            "0159", "0197", "0198", "0208", "0228", "0232", "0246", "0247", "0250", "0251",
+            "0252", "0253", "0257", "0258", "0259", "0260", "0262", "0263", "0265", "0266",
+            "0268", "0270", "0274", "0276", "0277", "0286", "0297", "0335", "0342", "0351",
+            "0357", "0359", "0363", "0368", "0373", "0383", "0403", "0431", "0434", "0491"
+        ];
+
+        let rmsTimelineFood = [];
+        rmsTimelineFood.push(rms_instructions_Food);
+
+        shuffle(getRmsTrials(baseFileNameFood, imagesMainFood, ".jpg", choices)).forEach(function(trial) {
+            rmsTimelineFood.push(trial);
+        });
+
+        rmsTimelineFood.forEach(function(trial) {
+            timeline_She.push(trial);
+        });
+
+
+        ////////////// Food bRMS - He //////////////
+
+        const rms_instructions_Food_male = {
+            type: "html-keyboard-response",
+            pages: [
+                "בניסוי זה יוצגו ריבועים צבעוניים מרצדים, ומדי פעם יופיעו עליהם גירויים שונים. מטרתך היא לזהות היכן מופיע גירוי – האם מימין או משמאל לנקודה בה אתה מתמקד במסך.",
+                "קצב הופעת הגירויים בניסוי מאוד משתנה. לפעמים הגירויים יופיעו במהירות בזה אחר זה, ולפעמים ייקח להם זמן. ",
+                "חשוב לנו מאוד לדעת מתי בדיוק התחילו להופיע הגירויים. לכן נבקש ממך למקד את המבט בצלב שבמרכז המסך, וללחוץ על מקש התשובה ברגע שאתה יודע את התשובה. אנא היה הכי מדוייק והכי מהיר שאתה יכול להיות. ",
+                "אם ראית גירוי משמאל מרכז המסך, יש ללחוץ על המקש Q אם ראית גירוי מימין למרכז המסך, יש ללחוץ על המקש P.",
+                "כעת נתחיל את המטלה. נבקשך לשבת בנוחות ככל האפשר ולמקם את האצבעות על שני המקשים P-ו Q. כשאתה מוכן, הקיש המשך.",
+            ],
+            "show_clickable_nav": true,
+            "type": "instructions",
+            "direction": "rtl",
+            "name": "rms_instructions_Food_male"
+        };
+
+        let rmsTimelineFoodM = []
+        rmsTimelineFoodM.push(rms_instructions_Food_male);
+
+        shuffle(getRmsTrials(baseFileNameFood, imagesMainFood, ".jpg", choices)).forEach(function(trial) {
+            rmsTimelineFoodM.push(trial);
+        });
+
+        rmsTimelineFoodM.forEach(function(trial) {
+            timeline_He.push(trial);
+        });
+
+
+        ////////////// Questionnaires - She //////////////
+
+        /// DEBQ ///
+        var instructions_DEBQ = {
+            type: "html-keyboard-response",
+            stimulus: `
+        <p style="text-align:center;" >
+        כעת יופיע שאלון שבו תתבקשי לסמן מ1 עד 5 את מידת ההסכמה שלך עם המשפט המוצג  <br />
+        <br />
+        אנא תעני עליהן בכנות המירבית <br />
+        אין תשובה נכונה ולא נכונה <br />
+        <br />
+        שימי לב שלא יהיה ניתן להמשיך הלאה בלי מענה על כל השאלות
+        <br />
+        כדי להתחיל, לחצי על מקש הרווח<br />
+        </p>
+    `,
+            post_trial_gap: 2000
+        };
+
+        /* Add to the timeline_She */
+        timeline_She.push(instructions_DEBQ);
+
+        var likert_scale_DEBQ = [
+            "לא מסכימה במידה רבה",
+            "לא מסכימה במידה מועטה",
+            "ניטרלית",
+            "מסכימה במידה מועטה",
+            "מסכימה במידה רבה"
+        ];
+
+        var DEBQ_1 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "במידה ועלית במשקל, האם תאכלי פחות ממה שאת רגילה לאכול?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "האם בזמן ארוחות את מנסה לאכול פחות ממה שאת רוצה לאכול?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "באיזו תדירות את מסרבת לאוכל או משקה בגלל שאת מודאגת בנוגע למשקלך?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_2 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם את עוקבת בדיוק אחרי מה שאת אוכלת?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "האם את אוכלת באופן מכוון מאכלים דיאטטים?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "כשאת אוכלת יותר מידי, האם תאכלי פחות מהרגיל בימים הבאים?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_3 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם את אוכלת פחות באופן מכוון כדי לא להעלות במשקל?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "באיזו תדירות את מנסה להימנע מלאכול בין ארוחות בגלל שאת שומרת על המשקל שלך?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "באיזו תדירות את מנסה להימנע מלאכול בערב בגלל שאת שומרת על המשקל שלך?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_4 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם את לוקחת בחשבון את המשקל שלך כשאת בוחרת מה לאכול?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאת עצבנית?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאין לך מה לעשות?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_5 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם יש לך חשק לאכול כשאת מדוכאת או מתוסכלת?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאת מרגישה בודדה?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשמישהי.ו מאכזב.ת אותך?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_6 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם יש לך חשק לאכול כשאת כעוסה?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאת מתקרבת לאירוע בלתי נעים שעומד לקרות?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאת חרדה, מודאגת או מתוחה?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_7 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם יש לך חשק לאכול כאשר דברים לא מסתדרים לך או כאשר דברים משתבשים?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאת מבוהלת?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאת מאוכזבת?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_8 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם יש לך חשק לאכול כשאת נסערת מבחינה רגשית?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאת משועממת או חסרת מנוחה?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "במידה ואוכל טעים לך, האם תאכלי יותר מבדרך כלל?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_9 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "במידה ואוכל מריח טוב ונראה טוב, האם תאכלי יותר מדרך כלל?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "במידה ואת רואה או מריחה אוכל טעים, האם יש לך חשק לאכול אותו?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "במידה ויש לך אוכל טעים, האם תאכלי אותו מיד?",
+                labels: likert_scale_DEBQ,
+                required: true
+
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_10 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "במידה ואת הולכת ליד מאפיה, האם יש לך חשק לקנות משהו טעים לאכול?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "במידה ואת הולכת ליד חנות ממתקים או בית קפה, האם יש לך חשק לקנות משהו טעים לאכול?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאת רואה אחרים אוכלים?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_11 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם את מסוגלת להתאפק מלאכול מאכלים טעימים?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "האם את אוכלת יותר מהרגיל כאשר את רואה אחרים אוכלים?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }, {
+                prompt: "בעת הכנת ארוחה, האם את נוטה לאכול משהו?",
+                labels: likert_scale_DEBQ,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        /* Add to the timeline_She */
+        timeline_She.push(DEBQ_1, DEBQ_2, DEBQ_3, DEBQ_4, DEBQ_5, DEBQ_6, DEBQ_7, DEBQ_8, DEBQ_9, DEBQ_10, DEBQ_11);
+
+
+        /// DASS ///
+        var instructions_DASS = {
+            type: "html-keyboard-response",
+            stimulus: `
+        <p style="text-align:center;" >
+        כעת יופיע שאלון שבו תתבקשי לסמן מ1 עד 4 את מידת ההסכמה שלך עם המשפט המוצג  <br />
+        <br />
+        אנא תעני עליהן בכנות המירבית <br />
+        אין תשובה נכונה ולא נכונה <br />
+        <br />
+        שימי לב שלא יהיה ניתן להמשיך הלאה בלי מענה על כל השאלות
+        <br />
+        כדי להתחיל, לחצי על מקש הרווח<br />
+        </p>
+    `,
+            post_trial_gap: 2000
+        };
+
+        /* Add to the timeline_She */
+        timeline_She.push(instructions_DASS);
+
+        var likert_scale_DASS = [
+            "האמירה לא מתארת את מצבי כלל",
+            "האמירה מתארת את מצבי במידה מסוימת או בחלק מהזמן",
+            "האמירה מתארת את מצבי במידה ניכרת או בחלק ניכר מהזמן",
+            "האמירה מתארת את מצבי במידה רבה או ברוב הזמן"
+        ];
+
+        var DASS_1 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "התקשיתי להירגע ולנוח",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "חשתי יובש בפה",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "התקשיתי לחוות כל הרגשה חיובית",
+                labels: likert_scale_DASS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DASS_2 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "חשתי קושי בנשימה: לדוגמה, נשימה מואצת במיוחד, חוסר אוויר בלי קשר למאמץ גופני",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "לא הצלחתי להזיז את עצמי ולעשות דברים",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "נטיתי להגזים בתגובותיי למצבים מסוימים",
+                labels: likert_scale_DASS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DASS_3 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "חשתי רעד למשל בידיים",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "הרגשתי שאני מבזבזת אנרגיה נפשית ומתעצבנת יותר מידי",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "חששתי ממצבים בהם אולי אכנס לחרדה ואעשה צחוק מעצמי",
+                labels: likert_scale_DASS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DASS_4 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "הרגשתי שאין לי למה לצפות בעתיד",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "שמתי לב שאני נהיית מתוחה ועצבנית",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "התקשיתי להרפות ולהירגע",
+                labels: likert_scale_DASS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DASS_5 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "חשתי מדוכדכת ועצובה",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "הייתי חסרת סבלנות כלפי כל דבר שהפריע לי במעשיי",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "הרגשתי שאני קרובה למצב של פאניקה",
+                labels: likert_scale_DASS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DASS_6 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "לא הצלחתי להתלהב משום דבר",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "הרגשתי שאיני שווה הרבה כאדם",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "הרגשתי רגישה ופגיעה למדי",
+                labels: likert_scale_DASS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DASS_7 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "חשתי בפעילות ליבי גם ללא קשר למאמץ גופני: לדוגמה, תחושת דופק מהיר, תחושה של החסרת פעימת לב",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "הייתי מפוחדת ללא סיבה טובה",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "הרגשתי שהחיים חסרי משמעות",
+                labels: likert_scale_DASS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+
+
+        /* Add to the timeline_She */
+        timeline_She.push(DASS_1, DASS_2, DASS_3, DASS_4, DASS_5, DASS_6, DASS_7);
+
+        /// Thoughts ///
+        var instructions_Thoughts = {
+            type: "html-keyboard-response",
+            stimulus: `
+        <p style="text-align:center;" >
+        כעת יופיע שאלון שבו תתבקשי לסמן מ1 עד 100 את מידת ההסכמה שלך עם המשפט המוצג  <br />
+        <br />
+        אנא תעני עליהן בכנות המירבית <br />
+        אין תשובה נכונה ולא נכונה <br />
+        <br />
+        כדי להתחיל, לחצי על מקש הרווח<br />
+        </p>
+    `
+        };
+
+        /* Add to the timeline_She */
+        timeline_She.push(instructions_Thoughts);
+
+        var T1 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני טיפשה </p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T2 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני לא טובה</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T3 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני כישלון</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T4 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני חסרת תועלת</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T5 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני משעממת</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T6 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני לא אישה חביבה</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T7 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני לגמרי לבד</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T8 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני לא אוהבת את עצמי כל כך</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T9 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני לא אהובה</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T10 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני מכוערת</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T11 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם היריכיים שלי מוצקות, זה אומר שאני אישה טובה יותר</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T12 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם המותניים שלי צרות, זה אומר שאני מצליחה</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T13 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם הישבן שלי קטן, אנשים יקחו אותי ברצינות</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T14 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני עולה במשקל, זה אומר שאני אדם רע</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T15 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני עולה במשקל, אני כלום</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T16 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם מבנה הגוף שלי פרופורציונלי, אנשים יאהבו אותי</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T17 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם המותניים שלי דקות, אקבל יותר אישור מאנשים אחרים</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T18 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם ארד במשקל, אנשים יהיו ידידותיים אליי וירצו להכיר אותי</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T19 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם ארד במשקל, לאנשים יהיה אכפת ממני</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T20 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם ארד במשקל, אחשב יותר בעולם</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T21 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם הבטן שלי תהיה שטוחה, אני אהיה רצויה יותר</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T22 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם הגוף שלי יהיה מוצק יותר, אני אהיה יותר מושכת</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T23 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם הגוף שלי רזה, אני יכולה להרגיש טוב עם עצמי</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T24 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אוכל קינוחים, אשמין</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T25 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>שומן / רופסות בגוף זה מגעיל</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T26 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני אוכל מאכלים רעים (כמו שומנים, ממתקים, לחם ודגנים) הם יהפכו לשומן</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T27 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אכלתי משהו, אני חייבת להיפטר ממנו כמה שיותר מהר</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T28 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני חווה התקף אכילה ואז אני מקיאה, אז אני יכולה להישאר בשליטה</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T29 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני אוכל 3 ארוחות ביום כמו אנשים אחרים, אעלה במשקל</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T30 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני אוכל כרגיל, אני אעלה במשקל</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T31 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני נשארת רעבה אני יכולה להישמר מפני איבוד שליטה והשמנה</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var T32 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני אוכל מאכל אסור, אני לא אוכל להפסיק</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        timeline_She.push(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15,
+            T16, T17, T18, T19, T20, T21, T22, T23, T24, T25, T26, T27, T28, T29, T30, T31, T32);
+
+
+        /// ASRS ///
+        var instructions_ASRS = {
+            type: "html-keyboard-response",
+            stimulus: `
+        <p style="text-align:center;" >
+        כעת יופיע שאלון שבו תתבקשי לסמן את שכיחות ההופעה של כל אחד מהסימפטומים המוצגים  <br />
+        <br />
+        כשאת עונה על כל שאלה, סמני את התשובה המתארת בצורה הטובה ביותר את האופן בו הרגשת וניהלת את עצמך בששת החודשים האחרונים <br />
+        <br />
+        אנא תעני עליהן בכנות המירבית <br />
+        אין תשובה נכונה ולא נכונה <br />
+        <br />
+        שימי לב שלא יהיה ניתן להמשיך הלאה בלי מענה על כל השאלות
+        <br />
+        כדי להתחיל, לחצי על מקש הרווח<br />
+        </p>
+    `,
+            post_trial_gap: 2000
+        };
+
+        /* Add to the timeline_She */
+        timeline_She.push(instructions_ASRS);
+
+        var likert_scale_ASRS = [
+            "אף פעם לא",
+            "לעיתים רחוקות",
+            "לפעמים",
+            "לעיתים תכופות",
+            "לעיתים תכופות מאוד"
+        ];
+
+        var ASRS_1 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "באיזו תכיפות את מתקשה להשלים את הפרטים הקטנים של פרויקט, מהרגע בו החלקים המאתגרים הסתיימו?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות את מתקשה ליצור סדר בדברים, כאשר את מבצעת משימה המצריכה ארגון?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות את מתקשה בזכירת פגישות או התחייבויות?",
+                labels: likert_scale_ASRS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var ASRS_2 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "כאשר מוטלת עלייך משימה המצריכה חשיבה מרובה, באיזו תכיפות את נמנעת או דוחה את התחלתה?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות את מתפתלת או מניעה בקוצר-רוח את ידייך או רגלייך, כאשר עלייך לשבת במקומך למשך זמן ארוך?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות את מרגישה פעילה יתר על המידה או מרגישה צורך לעשות דברים, כאילו את פועלת על ידי מנוע?",
+                labels: likert_scale_ASRS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var ASRS_3 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "באיזו תכיפות את מבצעת שגיאות הנובעות מרשלנות, כאשר עלייך לעבוד על פרויקט משעמם או קשה?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות את מתקשה בשמירה על ריכוז, כאשר את מבצעת עבודה משעממת או עבודה החוזרת על עצמה?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות את מתקשה להתרכז במה שאנשים אומרים לך, אפילו כאשר הם מדברים אלייך באופן ישיר?",
+                labels: likert_scale_ASRS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var ASRS_4 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "באיזו תכיפות את מאבדת חפצים או מתקשה במציאתם, בעבודה או בבית?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות דעתך מוסחת על ידי פעילות או רעש בסביבתך?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות את קמה ממושבך במהלך פגישה או בכל סיטואציה אחרת, בה מצופה ממך להישאר במקומך?",
+                labels: likert_scale_ASRS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var ASRS_5 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "באיזו תכיפות את מרגישה חסרת מנוחה או קצרת-רוח?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות את מתקשה להירגע ולהשתחרר כאשר יש לך זמן לעצמך?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות את מוצאת את עצמך מדברת יותר מידי כאשר את בסיטואציה חברתית?",
+                labels: likert_scale_ASRS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var ASRS_6 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "כאשר את במהלך שיחה, באיזו תכיפות את מוצאת את עצמך מסיימת משפטים של האנשים עימם את מדברת, לפני שהם מסיימים אותם בעצמם?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות את מתקשה לחכות לתורך בסיטואציות בהן את נדרשת לכך?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות את מפריעה לאחרים כאשר הם עסוקים?",
+                labels: likert_scale_ASRS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+
+        /* Add to the timeline_She */
+        timeline_She.push(ASRS_1, ASRS_2, ASRS_3, ASRS_4, ASRS_5, ASRS_6);
+
+
+        /// BIS ///
+        var instructions_BIS = {
+            type: "html-keyboard-response",
+            stimulus: `
+            <p style="text-align:center;" >
+        כעת יופיע שאלון שבו תתבקשי לסמן מ1 עד 4 עד כמה המשפטים הבאים מתארים אותך  <br />
+        <br />
+        אנא תעני עליהן בכנות המירבית <br />
+        אין תשובה נכונה ולא נכונה <br />
+        <br />
+        שימי לב שלא יהיה ניתן להמשיך הלאה בלי מענה על כל השאלות
+        <br />
+        כדי להתחיל, לחצי על מקש הרווח<br />
+        </p>
+    `,
+            post_trial_gap: 2000
+        };
+
+        /* Add to the timeline_She */
+        timeline_She.push(instructions_BIS);
+
+        var likert_scale_BIS = [
+            "לעיתים נדירות/אף פעם לא",
+            "מידי פעם",
+            "לעיתים תכופות",
+            "כמעט תמיד/תמיד"
+        ];
+
+        var BIS_1 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני מתכננת משימות בקפידה",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני עושה דברים בלי לחשוב",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני מחליטה מהר",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_2 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני מפנה תשומת לב",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני ברת מזל",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "המחשבות שלי מתרוצצות",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_3 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני מתכננת טיולים הרבה לפני הזמן",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני בשליטה עצמית",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני מתרכזת בקלות",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_4 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני חוסכת כסף באופן קבוע",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני 'מתפתלת' בהצגות או בהרצאות",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "המחשבות שלי זהירות",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_5 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני פועלת כדי לאפשר לעצמי ביטחון תעסוקתי",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני אומרת דברים בלי לחשוב",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני אוהבת לחשוב על בעיות מורכבות",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_6 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני נוהגת להחליף עבודות",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני פועלת על סמך דחפים",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני משתעממת בקלות בעת פתירת בעיות מורכבות",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_7 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני חיה את הרגע",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "המחשבות שלי יציבות",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני עוברת דירה לעיתים קרובות",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_8 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני קונה דברים בלהט הרגע",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני יכולה לחשוב רק על דבר אחד בכל רגע",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני מחליפה תחביבים",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_9 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני מוציאה כסף יותר מההכנסות שלי",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "כאשר אני חושבת על משהו, פורצות לי מחשבות חיצוניות",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "ההווה מעסיק אותי יותר מאשר העתיד",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_10 = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני חסרת מנוחה בהצגות או הרצאות",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני אוהבת פאזלים",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "המחשבה שלי מכוונת לעתיד",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        /* Add to the timeline_She */
+        timeline_She.push(BIS_1, BIS_2, BIS_3, BIS_4, BIS_5, BIS_6, BIS_7, BIS_8, BIS_9, BIS_10);
+
+        ////////////// Questionnaires - He //////////////
+
+        /// DEBQ ///
+        var instructions_DEBQ_male = {
+            type: "html-keyboard-response",
+            stimulus: `
+    <p style="text-align:center;" >
+        כעת יופיע שאלון שבו תתבקש לסמן מ1 עד 5 את מידת ההסכמה שלך עם המשפט המוצג  <br />
+        <br />
+        אנא תענה עליהן בכנות המירבית <br />
+        אין תשובה נכונה ולא נכונה <br />
+        <br />
+        שים לב שלא יהיה ניתן להמשיך הלאה בלי מענה על כל השאלות
+        <br />
+        כדי להתחיל, לחץ על מקש הרווח<br />
+        </p>
+    `,
+            post_trial_gap: 2000
+        };
+
+        /* Add to the timeline_He */
+        timeline_He.push(instructions_DEBQ_male);
+
+        var likert_scale_DEBQ_male = [
+            "לא מסכים במידה רבה",
+            "לא מסכים במידה מועטה",
+            "ניטרלי",
+            "מסכים במידה מועטה",
+            "מסכים במידה רבה"
+        ];
+
+        var DEBQ_1_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "במידה ועלית במשקל, האם תאכל פחות ממה שאתה רגיל לאכול?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "האם בזמן ארוחות אתה מנסה לאכול פחות ממה שאתה רוצה לאכול?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "באיזו תדירות אתה מסרב לאוכל או משקה בגלל שאתה מודאג בנוגע למשקלך?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_2_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם אתה עוקב בדיוק אחרי מה שאתה אוכל?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "האם אתה אוכל באופן מכוון מאכלים דיאטטים?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "כשאתה אוכל יותר מידי, האם תאכל פחות מהרגיל בימים הבאים?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_3_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם אתה אוכל פחות באופן מכוון כדי לא להעלות במשקל?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "באיזו תדירות אתה מנסה להימנע מלאכול בין ארוחות בגלל שאתה שומר על המשקל שלך?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "באיזו תדירות אתה מנסה להימנע מלאכול בערב בגלל שאתה שומר על המשקל שלך?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {}],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_4_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם אתה לוקח בחשבון את המשקל שלך כשאתה בוחר מה לאכול?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאתה עצבני?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאין לך מה לעשות?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_5_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם יש לך חשק לאכול כשאתה מדוכא או מתוסכל?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאתה מרגיש בודד?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשמישהי.ו מאכזב.ת אותך?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_6_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם יש לך חשק לאכול כשאתה כעוס?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאתה מתקרב לאירוע בלתי נעים שעומד לקרות?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאתה חרד, מודאג או מתוח?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_7_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם יש לך חשק לאכול כאשר דברים לא מסתדרים לך או כאשר דברים משתבשים?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאתה מבוהל?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאתה מאוכזב?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_8_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם יש לך חשק לאכול כשאתה נסער מבחינה רגשית?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאתה משועמם או חסר מנוחה?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "במידה ואוכל טעים לך, האם תאכל יותר מבדרך כלל?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_9_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "במידה ואוכל מריח טוב ונראה טוב, האם תאכל יותר מדרך כלל?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "במידה ואתה רואה או מריח אוכל טעים, האם יש לך חשק לאכול אותו?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "במידה ויש לך אוכל טעים, האם תאכל אותו מיד?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_10_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "במידה ואתה הולך ליד מאפיה, האם יש לך חשק לקנות משהו טעים לאכול?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "במידה ואתה הולך ליד חנות ממתקים או בית קפה, האם יש לך חשק לקנות משהו טעים לאכול?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "האם יש לך חשק לאכול כשאתה רואה אחרים אוכלים?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DEBQ_11_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "האם אתה מסוגל להתאפק מלאכול מאכלים טעימים?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "האם אתה אוכל יותר מהרגיל כאשר אתה רואה אחרים אוכלים?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }, {
+                prompt: "בעת הכנת ארוחה, האם אתה נוטה לאכול משהו?",
+                labels: likert_scale_DEBQ_male,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+
+        /* Add to the timeline_He */
+        timeline_He.push(DEBQ_1_male, DEBQ_2_male, DEBQ_3_male, DEBQ_4_male, DEBQ_5_male, DEBQ_6_male, DEBQ_7_male,
+            DEBQ_8_male, DEBQ_9_male, DEBQ_10_male, DEBQ_11_male, );
+
+
+        /// DASS ///
+        var instructions_DASS_male = {
+            type: "html-keyboard-response",
+            stimulus: `
+    <p style="text-align:center;" >
+        כעת יופיע שאלון שבו תתבקש לסמן מ1 עד 4 את מידת ההסכמה שלך עם המשפט המוצג  <br />
+        <br />
+        אנא תענה עליהן בכנות המירבית <br />
+        אין תשובה נכונה ולא נכונה <br />
+        <br />
+        שים לב שלא יהיה ניתן להמשיך הלאה בלי מענה על כל השאלות
+        <br />
+        כדי להתחיל, לחץ על מקש הרווח<br />
+        </p>
+    `,
+            post_trial_gap: 2000
+        };
+
+        /* Add to the timeline_He */
+        timeline_He.push(instructions_DASS_male);
+
+        var likert_scale_DASS = [
+            "האמירה לא מתארת את מצבי כלל",
+            "האמירה מתארת את מצבי במידה מסוימת או בחלק מהזמן",
+            "האמירה מתארת את מצבי במידה ניכרת או בחלק ניכר מהזמן",
+            "האמירה מתארת את מצבי במידה רבה או ברוב הזמן"
+        ];
+
+        var DASS_1_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "התקשיתי להירגע ולנוח",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "חשתי יובש בפה",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "התקשיתי לחוות כל הרגשה חיובית",
+                labels: likert_scale_DASS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DASS_2_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "חשתי קושי בנשימה: לדוגמה, נשימה מואצת במיוחד, חוסר אוויר בלי קשר למאמץ גופני",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "לא הצלחתי להזיז את עצמי ולעשות דברים",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "נטיתי להגזים בתגובותיי למצבים מסוימים",
+                labels: likert_scale_DASS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DASS_3_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "חשתי רעד למשל בידיים",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "הרגשתי שאני מבזבז אנרגיה נפשית ומתעצבן יותר מידי",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "חששתי ממצבים בהם אולי אכנס לחרדה ואעשה צחוק מעצמי",
+                labels: likert_scale_DASS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DASS_4_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "הרגשתי שאין לי למה לצפות בעתיד",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "שמתי לב שאני נהיה מתוח ועצבני",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "התקשיתי להרפות ולהירגע",
+                labels: likert_scale_DASS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DASS_5_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "חשתי מדוכדך ועצוב",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "הייתי חסר סבלנות כלפי כל דבר שהפריע לי במעשיי",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "הרגשתי שאני קרוב למצב של פאניקה",
+                labels: likert_scale_DASS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DASS_6_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "לא הצלחתי להתלהב משום דבר",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "הרגשתי שאיני שווה הרבה כאדם",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "הרגשתי רגיש ופגיע למדי",
+                labels: likert_scale_DASS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var DASS_7_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "חשתי בפעילות ליבי גם ללא קשר למאמץ גופני: לדוגמה, תחושת דופק מהיר, תחושה של החסרת פעימת לב",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "הייתי מפוחד ללא סיבה טובה",
+                labels: likert_scale_DASS,
+                required: true
+            }, {
+                prompt: "הרגשתי שהחיים חסרי משמעות",
+                labels: likert_scale_DASS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        /* Add to the timeline_He */
+        timeline_He.push(DASS_1_male, DASS_2_male, DASS_3_male, DASS_4_male, DASS_5_male, DASS_6_male, DASS_7_male, );
+
+        /// Thoughts ///
+        var instructions_Thoughts_male = {
+            type: "html-keyboard-response",
+            stimulus: `
+    <p style="text-align:center;" >
+        כעת יופיע שאלון שבו תתבקש לסמן מ1 עד 100 את מידת ההסכמה שלך עם המשפט המוצג  <br />
+        <br />
+        אנא תענה עליהן בכנות המירבית <br />
+        אין תשובה נכונה ולא נכונה <br />
+        <br />
+        כדי להתחיל, לחץ על מקש הרווח<br />
+        </p>
+    `,
+            post_trial_gap: 2000
+        };
+
+        /* Add to the timeline_He */
+        timeline_He.push(instructions_Thoughts_male);
+
+        var Tm1 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני טיפש</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm2 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני לא טוב</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm3 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני כישלון</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm4 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני חסר תועלת</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm5 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני משעמם</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm6 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני לא איש חביב</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm7 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני לגמרי לבד</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm8 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני לא אוהב את עצמי כל כך</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm9 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני לא אהוב</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm10 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אני מכוער</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm11 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם היריכיים שלי מוצקות, זה אומר שאני איש טוב יותר</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm12 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם המותניים שלי צרות, זה אומר שאני מצליח</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm13 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם הישבן שלי קטן, אנשים יקחו אותי ברצינות</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm14 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני עולה במשקל, זה אומר שאני אדם רע</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm15 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני עולה במשקל, אני כלום</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm16 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם מבנה הגוף שלי פרופורציונלי, אנשים יאהבו אותי</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm17 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם המותניים שלי דקות, אקבל יותר אישור מאנשים אחרים</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm18 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם ארד במשקל, אנשים יהיו ידידותיים אליי וירצו להכיר אותי</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm19 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם ארד במשקל, לאנשים יהיה אכפת ממני</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm20 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם ארד במשקל, אחשב יותר בעולם</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm21 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם הבטן שלי תהיה שטוחה, אני אהיה רצוי יותר</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm22 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם הגוף שלי יהיה מוצק יותר, אני אהיה יותר מושך</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm23 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם הגוף שלי רזה, אני יכול להרגיש טוב עם עצמי</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm24 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אוכל קינוחים, אשמין</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm25 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>שומן / רופסות בגוף זה מגעיל</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm26 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני אוכל מאכלים רעים (כמו שומנים, ממתקים, לחם ודגנים) הם יהפכו לשומן</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm27 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אכלתי משהו, אני חייב להיפטר ממנו כמה שיותר מהר</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm28 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני חווה התקף אכילה ואז אני מקיא, אז אני יכול להישאר בשליטה</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm29 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני אוכל 3 ארוחות ביום כמו אנשים אחרים, אעלה במשקל</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm30 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני אוכל כרגיל, אני אעלה במשקל</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm31 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני נשאר רעב אני יכול להישמר מפני איבוד שליטה והשמנה</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        var Tm32 = {
+            type: "html-slider-response",
+            stimulus: `<div style="width:1000px;">
+            <p>אם אני אוכל מאכל אסור, אני לא אוכל להפסיק</p>
+            `,
+            require_movement: true,
+            labels: ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10', '0']
+        };
+
+        timeline_He.push(Tm1, Tm2, Tm3, Tm4, Tm5, Tm6, Tm7, Tm8, Tm9, Tm10, Tm11, Tm12, Tm13, Tm14, Tm15,
+            Tm16, Tm17, Tm18, Tm19, Tm20, Tm21, Tm22, Tm23, Tm24, Tm25, Tm26, Tm27, Tm28, Tm29, Tm30, Tm31, Tm32);
+
+        /// ASRS ///
+        var instructions_ASRS_male = {
+            type: "html-keyboard-response",
+            stimulus: `
+        <p style="text-align:center;" >
+        כעת יופיע שאלון שבו תתבקש לסמן את שכיחות ההופעה של כל אחד מהסימפטומים המוצגים  <br />
+        <br />
+        כשאתה עונה על כל שאלה, סמן את התשובה המתארת בצורה הטובה ביותר את האופן בו הרגשת וניהלת את עצמך בששת החודשים האחרונים <br />
+        <br />
+        אנא תענה עליהן בכנות המירבית <br />
+        אין תשובה נכונה ולא נכונה <br />
+        <br />
+        שים לב שלא יהיה ניתן להמשיך הלאה בלי מענה על כל השאלות
+        <br />
+        כדי להתחיל, לחץ על מקש הרווח<br />
+        </p>
+    `,
+            post_trial_gap: 2000
+        };
+
+        /* Add to the timeline_She */
+        timeline_He.push(instructions_ASRS_male);
+
+        var likert_scale_ASRS = [
+            "אף פעם לא",
+            "לעיתים רחוקות",
+            "לפעמים",
+            "לעיתים תכופות",
+            "לעיתים תכופות מאוד"
+        ];
+
+        var ASRS_1_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "באיזו תכיפות אתה מתקשה להשלים את הפרטים הקטנים של פרויקט, מהרגע בו החלקים המאתגרים הסתיימו?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות אתה מתקשה ליצור סדר בדברים, כאשר אתה מבצע משימה המצריכה ארגון?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות אתה מתקשה בזכירת פגישות או התחייבויות?",
+                labels: likert_scale_ASRS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var ASRS_2_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "כאשר מוטלת עלייך משימה המצריכה חשיבה מרובה, באיזו תכיפות אתה נמנע או דוחה את התחלתה?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות אתה מתפתל או מניע בקוצר-רוח את ידייך או רגלייך, כאשר עלייך לשבת במקומך למשך זמן ארוך?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות אתה מרגיש פעיל יתר על המידה או מרגיש צורך לעשות דברים, כאילו אתה פועל על ידי מנוע?",
+                labels: likert_scale_ASRS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var ASRS_3_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "באיזו תכיפות אתה מבצע שגיאות הנובעות מרשלנות, כאשר עלייך לעבוד על פרויקט משעמם או קשה?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות אתה מתקשה בשמירה על ריכוז, כאשר אתה מבצע עבודה משעממת או עבודה החוזרת על עצמה?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות אתה מתקשה להתרכז במה שאנשים אומרים לך, אפילו כאשר הם מדברים אלייך באופן ישיר?",
+                labels: likert_scale_ASRS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var ASRS_4_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "באיזו תכיפות אתה מאבד חפצים או מתקשה במציאתם, בעבודה או בבית?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות דעתך מוסחת על ידי פעילות או רעש בסביבתך?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות אתה קם ממושבך במהלך פגישה או בכל סיטואציה אחרת, בה מצופה ממך להישאר במקומך?",
+                labels: likert_scale_ASRS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var ASRS_5_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "באיזו תכיפות אתה מרגיש חסר מנוחה או קצר-רוח?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות אתה מתקשה להירגע ולהשתחרר כאשר יש לך זמן לעצמך?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות אתה מוצא את עצמך מדבר יותר מידי כאשר אתה בסיטואציה חברתית?",
+                labels: likert_scale_ASRS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var ASRS_6_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "כאשר אתה במהלך שיחה, באיזו תכיפות אתה מוצא את עצמך מסיים משפטים של האנשים עימם אתה מדבר, לפני שהם מסיימים אותם בעצמם?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות אתה מתקשה לחכות לתורך בסיטואציות בהן אתה נדרש לכך?",
+                labels: likert_scale_ASRS,
+                required: true
+            }, {
+                prompt: "באיזו תכיפות אתה מפריע לאחרים כאשר הם עסוקים?",
+                labels: likert_scale_ASRS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        timeline_He.push(ASRS_1_male, ASRS_2_male, ASRS_3_male, ASRS_4_male, ASRS_5_male, ASRS_6_male, );
+
+        /// BIS ///
+        var instructions_BIS_male = {
+            type: "html-keyboard-response",
+            stimulus: `
+            <p style="text-align:center;" >
+        כעת יופיע שאלון שבו תתבקש לסמן מ1 עד 4 עד כמה המשפטים הבאים מתארים אותך  <br />
+        <br />
+        אנא תענה עליהן בכנות המירבית <br />
+        אין תשובה נכונה ולא נכונה <br />
+        <br />
+        שים לב שלא יהיה ניתן להמשיך הלאה בלי מענה על כל השאלות
+        <br />
+        כדי להתחיל, לחץ על מקש הרווח<br />
+        </p>
+    `,
+            post_trial_gap: 2000
+        };
+
+        /* Add to the timeline_She */
+        timeline_She.push(instructions_BIS_male);
+
+        var likert_scale_BIS = [
+            "לעיתים נדירות/אף פעם לא",
+            "מידי פעם",
+            "לעיתים תכופות",
+            "כמעט תמיד/תמיד"
+        ];
+
+        var BIS_1_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני מתכנן משימות בקפידה",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני עושה דברים בלי לחשוב",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני מחליט מהר",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_2_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני מפנה תשומת לב",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני בר מזל",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "המחשבות שלי מתרוצצות",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_3_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני מתכנן טיולים הרבה לפני הזמן",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני בשליטה עצמית",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני מתרכז בקלות",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_4_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני חוסך כסף באופן קבוע",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני 'מתפתל' בהצגות או בהרצאות",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "המחשבות שלי זהירות",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_5_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני פועל כדי לאפשר לעצמי ביטחון תעסוקתי",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני אומר דברים בלי לחשוב",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני אוהב לחשוב על בעיות מורכבות",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_6_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני נוהג להחליף עבודות",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני פועל על סמך דחפים",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני משתעמם בקלות בעת פתירת בעיות מורכבות",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_7_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני חי את הרגע",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "המחשבות שלי יציבות",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני עובר דירה לעיתים קרובות",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_8_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני קונה דברים בלהט הרגע",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני יכול לחשוב רק על דבר אחד בכל רגע",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני מחליף תחביבים",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_9_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני מוציא כסף יותר מההכנסות שלי",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "כאשר אני חושב על משהו, פורצות לי מחשבות חיצוניות",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "ההווה מעסיק אותי יותר מאשר העתיד",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        var BIS_10_male = {
+            type: "survey-likert",
+            questions: [{
+                prompt: "אני חסר מנוחה בהצגות או הרצאות",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "אני אוהב פאזלים",
+                labels: likert_scale_BIS,
+                required: true
+            }, {
+                prompt: "המחשבה שלי מכוונת לעתיד",
+                labels: likert_scale_BIS,
+                required: true
+            }],
+            required: true,
+            randomize_question_order: false
+        };
+
+        /* Add to the timeline_She */
+        timeline_She.push(BIS_1_male, BIS_2_male, BIS_3_male, BIS_4_male, BIS_5_male, BIS_6_male, BIS_7_male, BIS_8_male, BIS_9_male, BIS_10_male);
+
+        timeline_She.push(end_experiment_trial);
+        timeline_She.push(pavlovia_finish);
+        var if_pronouns = {
+            timeline: timeline_She,
+            conditional_function: function() {
+                var data = jsPsych.data.get().last(1).values()[0];
+                if (data.key_press == 83) {
+                    return true
+                } else if (data.key_press == 72) {
+                    return false
+                }
+            }
+        };
+
+
+        /* This should be the last one */
+        /* start the experiment */
+        // Init experiment (and run it)
+
+        jsPsych.init({
+            timeline: [pavlovia_init, welcome, instructions_Consent, Consent, if_Consent, pronouns, if_pronouns, ...timeline_He, end_experiment_trial, pavlovia_finish],
+            //timeline: [...rmsTimeline, ...getMaskedRmsTrials(baseFileName, ".png", 5)],
+            fullscreen: true,
+            on_finish: function() {
+                // Download subject data as .csv file
+                download("data.csv", jsPsych.data.get().csv());
+            }
+        });
+    </script>
+
+</html>
